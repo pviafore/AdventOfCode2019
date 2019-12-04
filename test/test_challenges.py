@@ -14,3 +14,8 @@ def test_day3():
     from challenge3 import WIRES, get_distance_to_closest_intersection, get_minimal_timing_delay
     assert get_distance_to_closest_intersection(WIRES) == 1285
     assert get_minimal_timing_delay(WIRES) == 14228
+
+def test_day4():
+    from challenge4 import PASSWORDS, get_number_of_matching_passwords, get_number_of_strict_matching_passwords
+    assert get_number_of_matching_passwords(PASSWORDS) == 1650
+    assert get_number_of_strict_matching_passwords(PASSWORDS) == 1129

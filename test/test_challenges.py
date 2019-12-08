@@ -34,3 +34,7 @@ def test_day7():
     from challenge7 import find_maximum_signal_to_thrusters, find_maximum_signal_to_thrusters_with_feedback 
     assert find_maximum_signal_to_thrusters() == 359142
     assert find_maximum_signal_to_thrusters_with_feedback() == 4374895
+
+def test_day8():
+    from challenge8 import IMAGE_DATA, get_product_of_1s_and_2s_in_target_layer
+    assert get_product_of_1s_and_2s_in_target_layer(IMAGE_DATA) == 2356

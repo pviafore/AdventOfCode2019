@@ -21,10 +21,17 @@ class ParameterMode(Flag):
 ComputerOperation = Callable[[ParameterMode], int]
 
 class Computer:
-    def __init__(self, program: List[int]):
-        self._halted = False
-        self._memory = program
+    def __init__(self, program: List[int], *, quiet=False, name="Computer"):
+        self._memory = list(program)
         self._instruction_pointer = 0
+        self._input_values: List[int] = []
+        self._last_output = 0
+        self.name = name
+
+        self.input_function: Callable[[], int] = lambda: int(input("Please enter a value: "))
+        self.output_function: Callable[[int], None] = print
+        if quiet:
+            self.output_function = lambda _: None
 
     def _opcode_mapping(self, code: OpCode) -> ComputerOperation:
         return {
@@ -56,15 +63,20 @@ class Computer:
                    self.read(address2, ParameterMode.SECOND in parameter_mode))
         return 4
 
-    def _input(self, _parameter_mode) -> int:
-        value = input("Enter in a value please: ")
+    def _input(self, _paramjeter_mode) -> int:
+        if not self._input_values:
+            value = self.input_function()
+        else:
+            value = self._input_values.pop(0)
         destination = self._get_parameters(1)[0]
+
         self.write(destination, int(value))
         return 2
 
     def _output(self, parameter_mode) -> int:
         destination = self._get_parameters(1)[0]
-        print(self.read(destination, ParameterMode.FIRST in parameter_mode))
+        self._last_output = self.read(destination, ParameterMode.FIRST in parameter_mode)
+        self.output_function(self._last_output)
         return 2
 
     def _jump_if_true(self, parameter_mode) -> int:
@@ -96,15 +108,20 @@ class Computer:
         return 4
 
     def _halt(self, _parameter_mode) -> int:
-        self._halted = True
-        return 0
+        return len(self._memory)
 
     def run_loop(self):
-        while not self._halted:
-            parameter_mode, opcode = self._get_opcode()
-            operation = self._opcode_mapping(opcode)
-            relative_jump = operation(parameter_mode)
-            self._jump(self._instruction_pointer + relative_jump)
+        try:
+            while self._instruction_pointer < len(self._memory):
+                parameter_mode, opcode = self._get_opcode()
+                operation = self._opcode_mapping(opcode)
+                relative_jump = operation(parameter_mode)
+                self._jump(self._instruction_pointer + relative_jump)
+        except Exception as exc:
+            print(f"Error: {exc}")
+            print(self._memory)
+            print(self._instruction_pointer)
+            raise exc
 
     def _get_opcode(self) -> Tuple[ParameterMode, OpCode]:
         opcode = self.read(self._instruction_pointer)
@@ -120,3 +137,9 @@ class Computer:
 
     def _jump(self, destination: int):
         self._instruction_pointer = destination
+
+    def inject_input(self, *input_values: int):
+        self._input_values += [x for x in input_values]
+
+    def get_last_output(self) -> int:
+        return self._last_output

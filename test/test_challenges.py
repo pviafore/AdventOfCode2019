@@ -19,3 +19,18 @@ def test_day4():
     from challenge4 import PASSWORDS, get_number_of_matching_passwords, get_number_of_strict_matching_passwords
     assert get_number_of_matching_passwords(PASSWORDS) == 1650
     assert get_number_of_strict_matching_passwords(PASSWORDS) == 1129
+
+def test_day5():
+    from challenge5 import run_program 
+    assert run_program(1) == 9219874
+    assert run_program(5)== 5893654
+
+def test_day6():
+    from challenge6 import ORBITS, get_total_orbits, get_transfer_distance
+    assert get_total_orbits(ORBITS) == 142497
+    assert get_transfer_distance(ORBITS) == 301
+
+def test_day7():
+    from challenge7 import find_maximum_signal_to_thrusters, find_maximum_signal_to_thrusters_with_feedback 
+    assert find_maximum_signal_to_thrusters() == 359142
+    assert find_maximum_signal_to_thrusters_with_feedback() == 4374895

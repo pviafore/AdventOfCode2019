@@ -60,26 +60,26 @@ class Computer:
 
     def _add(self, parameter_modes: List[ParameterMode]) -> int:
         address1, address2, destination = self._get_parameters()
-        self.write(destination,
+        self.write(destination, parameter_modes[2],
                    self.read(address1, parameter_modes[0]) +
                    self.read(address2, parameter_modes[1]))
         return 4
 
     def _multiply(self, parameter_modes: List[ParameterMode]) -> int:
         address1, address2, destination = self._get_parameters()
-        self.write(destination,
+        self.write(destination, parameter_modes[2],
                    self.read(address1, parameter_modes[0]) *
                    self.read(address2, parameter_modes[1]))
         return 4
 
-    def _input(self, _parameter_mode: List[ParameterMode]) -> int:
+    def _input(self, parameter_modes: List[ParameterMode]) -> int:
         if not self._debug.input_values:
             value = self.input_function()
         else:
             value = self._debug.input_values.pop(0)
         destination = self._get_parameters(1)[0]
 
-        self.write(destination, int(value))
+        self.write(destination, parameter_modes[0], int(value))
         return 2
 
     def _output(self, parameter_modes: List[ParameterMode]) -> int:
@@ -106,19 +106,19 @@ class Computer:
         address1, address2, destination = self._get_parameters(3)
         result = (self.read(address1, parameter_modes[0]) <
                   self.read(address2, parameter_modes[1]))
-        self.write(destination, 1 if result else 0)
+        self.write(destination, parameter_modes[2], 1 if result else 0)
         return 4
 
     def _equals(self, parameter_modes: List[ParameterMode]) -> int:
         address1, address2, destination = self._get_parameters(3)
         result = (self.read(address1, parameter_modes[0]) ==
                   self.read(address2, parameter_modes[1]))
-        self.write(destination, 1 if result else 0)
+        self.write(destination, parameter_modes[2], 1 if result else 0)
         return 4
 
     def _set_relative_value(self, parameter_modes: List[ParameterMode]) -> int:
         address1 = self._get_parameters(1)[0]
-        self._relative_value = self.read(address1, parameter_modes[0])
+        self._relative_value += self.read(address1, parameter_modes[0])
         return 2
 
     def _halt(self, _parameter_modes: List[ParameterMode]) -> int:
@@ -139,14 +139,17 @@ class Computer:
 
     def _get_opcode(self) -> Tuple[List[ParameterMode], OpCode]:
         opcode = self.read(self._instruction_pointer)
-        if self._instruction_pointer == 346:
-            print(opcode)
         parameter = opcode // 100
         flags = [ParameterMode(int(p)) for p in ("000" + str(parameter))[::-1]][:3]
         return flags, OpCode(opcode % 100)
 
-    def write(self, address: int, value: int):
-        self._memory[address] = value
+    def write(self, address: int, parameter_mode: ParameterMode, value: int):
+        if parameter_mode == ParameterMode.POSITIONAL:
+            self.extend_memory_if_necessary(address)
+            self._memory[address] = value
+        if parameter_mode == ParameterMode.RELATIVE:
+            self.extend_memory_if_necessary(address + self._relative_value)
+            self._memory[address + self._relative_value] = value
 
     def read(self,
              address_or_value: int,
@@ -154,8 +157,10 @@ class Computer:
         if parameter_mode == ParameterMode.IMMEDIATE:
             return address_or_value
         if parameter_mode == ParameterMode.POSITIONAL:
+            self.extend_memory_if_necessary(address_or_value)
             return self._memory[address_or_value]
         if parameter_mode == ParameterMode.RELATIVE:
+            self.extend_memory_if_necessary(address_or_value + self._relative_value)
             return self._memory[address_or_value + self._relative_value]
         raise RuntimeError("Unknown Parameter Mode")
 
@@ -164,7 +169,11 @@ class Computer:
         self._instruction_pointer = destination
 
     def inject_input(self, *input_values: int):
-        self._debug.input_values += [x for x in input_values]
+        self._debug.input_values += [*input_values]
 
     def get_last_output(self) -> int:
         return self._debug.last_output
+
+    def extend_memory_if_necessary(self, address: int):
+        if address >= len(self._memory):
+            self._memory += [0] * (address - len(self._memory) + 1)

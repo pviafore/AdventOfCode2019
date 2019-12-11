@@ -2,15 +2,15 @@ from itertools import product
 from typing import List
 
 from common.input_handling import get_input
-from common.intcode_computer import Computer
+from common.intcode_computer import Computer, ParameterMode
 
 def load_instructions() -> List[int]:
     return get_input("input/input2.txt", int, delimiter=",")
 
 def get_value_at_address_zero_after_calculation(noun: int = 12, verb: int = 2) -> int:
     computer = Computer(load_instructions())
-    computer.write(1, noun)
-    computer.write(2, verb)
+    computer.write(1, ParameterMode.POSITIONAL, noun)
+    computer.write(2, ParameterMode.POSITIONAL, verb)
     computer.run_loop()
     return computer.read(0)
 

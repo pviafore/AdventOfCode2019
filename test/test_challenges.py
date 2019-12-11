@@ -38,3 +38,13 @@ def test_day7():
 def test_day8():
     from challenge8 import IMAGE_DATA, get_product_of_1s_and_2s_in_target_layer
     assert get_product_of_1s_and_2s_in_target_layer(IMAGE_DATA) == 2356
+
+def test_day9():
+    from challenge9 import run_program
+    assert run_program(1) == 2955820355
+    assert run_program(2) == 46643
+
+def test_day10():
+    from challenge10 import ASTEROIDS, get_200th_asteroid_destroyed, get_number_of_asteroids_seen_from_best_station
+    assert get_number_of_asteroids_seen_from_best_station(ASTEROIDS) == 280
+    assert get_200th_asteroid_destroyed(ASTEROIDS) == 706

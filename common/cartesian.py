@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from itertools import product
+from typing import Callable, Dict, List, TypeVar
 
 @dataclass(frozen=True, order=True)
 class Point:
@@ -44,3 +45,20 @@ def get_slope(point1: Point, point2: Point) -> float:
     if point2.x == point1.x:
         return float("-inf") if point1.y > point2.y else float("inf")
     return (point2.y - point1.y) / (point2.x - point1.x)
+
+T = TypeVar("T") # pylint: disable=invalid-name
+def draw(points: Dict[Point, T],
+         transform_func: Callable[[T], str] = str,
+         *,
+         inverted: bool = False):
+    xes = range(min(p.x for p in points), max(p.x for p in points))
+
+    if inverted:
+        yes = range(max(p.y for p in points), min(p.y for p in points) - 1, -1)
+    else:
+        yes = range(min(p.y for p in points), max(p.y for p in points) + 1)
+    for y, x in product(yes, xes): # pylint: disable=invalid-name
+        if x == 0:
+            print()
+        print(transform_func(points[Point(x, y)]), end="")
+    print()

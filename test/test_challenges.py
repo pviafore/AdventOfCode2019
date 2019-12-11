@@ -48,3 +48,7 @@ def test_day10():
     from challenge10 import ASTEROIDS, get_200th_asteroid_destroyed, get_number_of_asteroids_seen_from_best_station
     assert get_number_of_asteroids_seen_from_best_station(ASTEROIDS) == 280
     assert get_200th_asteroid_destroyed(ASTEROIDS) == 706
+
+def test_day11():
+    from challenge11 import Color, run_program
+    assert run_program(Color.BLACK).get_painted_squares() == 1907

@@ -52,3 +52,12 @@ def test_day10():
 def test_day11():
     from challenge11 import Color, run_program
     assert run_program(Color.BLACK).get_painted_squares() == 1907
+
+def test_day12():
+    from challenge12 import MOONS, run_simulation
+    assert run_simulation(1000, MOONS) == 6735
+
+def test_day13():
+    from challenge13 import run_program
+    assert run_program().get_number_of_blocks() == 376
+    assert run_program(2).get_score() == 18509

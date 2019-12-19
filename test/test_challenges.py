@@ -61,3 +61,8 @@ def test_day13():
     from challenge13 import run_program
     assert run_program().get_number_of_blocks() == 376
     assert run_program(2).get_score() == 18509
+
+def test_day14():
+    from challenge14 import REACTIONS, get_number_of_ore, find_number_of_fuel
+    assert get_number_of_ore(REACTIONS) == 751038
+    assert find_number_of_fuel(REACTIONS) == 2074843

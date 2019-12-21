@@ -66,3 +66,8 @@ def test_day14():
     from challenge14 import REACTIONS, get_number_of_ore, find_number_of_fuel
     assert get_number_of_ore(REACTIONS) == 751038
     assert find_number_of_fuel(REACTIONS) == 2074843
+
+def test_day15():
+    from challenge15 import run_program
+    assert run_program().get_distance_to_oxygen_station() == 404
+    assert run_program().calculate_distance_for_oxygen_to_progpagate() == 406

@@ -28,16 +28,21 @@ ComputerOperation = Callable[[List[ParameterMode]], int]
 class Debug:
     input_values: List[int] = field(default_factory=list)
     last_output: int = 0
+
+@dataclass
+class Memory:
+    memory: List[int]
+    instruction_pointer: int
+    relative_value: int
 class Computer:
     def __init__(self, program: List[int], *, quiet=False, name="Computer"):
-        self._memory = list(program)
-        self._instruction_pointer = 0
+        self._memory = Memory(list(program), 0, 0)
         self._debug = Debug()
         self.name = name
-        self._relative_value = 0
 
         self.input_function: Callable[[], int] = lambda: int(input("Please enter a value: "))
         self.output_function: Callable[[int], None] = print
+        self.halt_function: Callable[[], bool] = lambda: False
         if quiet:
             self.output_function = lambda _: None
 
@@ -56,7 +61,8 @@ class Computer:
         }[code]
 
     def _get_parameters(self, size: int = 3) -> List[int]:
-        return self._memory[self._instruction_pointer + 1:self._instruction_pointer + 1 + size]
+        return self._memory.memory[self._memory.instruction_pointer + 1:
+                                   self._memory.instruction_pointer + 1 + size]
 
     def _add(self, parameter_modes: List[ParameterMode]) -> int:
         address1, address2, destination = self._get_parameters()
@@ -118,27 +124,28 @@ class Computer:
 
     def _set_relative_value(self, parameter_modes: List[ParameterMode]) -> int:
         address1 = self._get_parameters(1)[0]
-        self._relative_value += self.read(address1, parameter_modes[0])
+        self._memory.relative_value += self.read(address1, parameter_modes[0])
         return 2
 
     def _halt(self, _parameter_modes: List[ParameterMode]) -> int:
-        return len(self._memory)
+        return len(self._memory.memory)
 
     def run_loop(self):
         try:
-            while self._instruction_pointer < len(self._memory):
+            while (not self.halt_function() and
+                   self._memory.instruction_pointer < len(self._memory.memory)):
                 parameter_mode, opcode = self._get_opcode()
                 operation = self._opcode_mapping(opcode)
                 relative_jump = operation(parameter_mode)
-                self._jump(self._instruction_pointer + relative_jump)
+                self._jump(self._memory.instruction_pointer + relative_jump)
         except Exception as exc:
             print(f"Error: {exc}")
-            print(self._memory)
-            print(self._instruction_pointer)
+            print(self._memory.memory)
+            print(self._memory.instruction_pointer)
             raise exc
 
     def _get_opcode(self) -> Tuple[List[ParameterMode], OpCode]:
-        opcode = self.read(self._instruction_pointer)
+        opcode = self.read(self._memory.instruction_pointer)
         parameter = opcode // 100
         flags = [ParameterMode(int(p)) for p in ("000" + str(parameter))[::-1]][:3]
         return flags, OpCode(opcode % 100)
@@ -146,10 +153,10 @@ class Computer:
     def write(self, address: int, parameter_mode: ParameterMode, value: int):
         if parameter_mode == ParameterMode.POSITIONAL:
             self.extend_memory_if_necessary(address)
-            self._memory[address] = value
+            self._memory.memory[address] = value
         if parameter_mode == ParameterMode.RELATIVE:
-            self.extend_memory_if_necessary(address + self._relative_value)
-            self._memory[address + self._relative_value] = value
+            self.extend_memory_if_necessary(address + self._memory.relative_value)
+            self._memory.memory[address + self._memory.relative_value] = value
 
     def read(self,
              address_or_value: int,
@@ -158,15 +165,15 @@ class Computer:
             return address_or_value
         if parameter_mode == ParameterMode.POSITIONAL:
             self.extend_memory_if_necessary(address_or_value)
-            return self._memory[address_or_value]
+            return self._memory.memory[address_or_value]
         if parameter_mode == ParameterMode.RELATIVE:
-            self.extend_memory_if_necessary(address_or_value + self._relative_value)
-            return self._memory[address_or_value + self._relative_value]
+            self.extend_memory_if_necessary(address_or_value + self._memory.relative_value)
+            return self._memory.memory[address_or_value + self._memory.relative_value]
         raise RuntimeError("Unknown Parameter Mode")
 
 
     def _jump(self, destination: int):
-        self._instruction_pointer = destination
+        self._memory.instruction_pointer = destination
 
     def inject_input(self, *input_values: int):
         self._debug.input_values += [*input_values]
@@ -175,5 +182,5 @@ class Computer:
         return self._debug.last_output
 
     def extend_memory_if_necessary(self, address: int):
-        if address >= len(self._memory):
-            self._memory += [0] * (address - len(self._memory) + 1)
+        if address >= len(self._memory.memory):
+            self._memory.memory += [0] * (address - len(self._memory.memory) + 1)

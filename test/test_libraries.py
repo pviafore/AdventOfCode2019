@@ -1,4 +1,4 @@
-from common.cartesian import Point, get_manhattan_distance, get_slope, ORIGIN, TextGrid
+from common.cartesian import Point, get_manhattan_distance, get_orthogonal_points, get_slope, ORIGIN, TextGrid
 
 def test_manhattan_distance_on_self():
     assert get_manhattan_distance(Point(0,0), Point(0,0)) == 0
@@ -20,6 +20,16 @@ def test_point_to_above():
 
 def test_point_to_below():
     assert Point(0,0).to_below() == Point(0,-1)
+
+def test_get_orthogonal():
+    assert get_orthogonal_points(ORIGIN) == [Point(1, 0), Point(0, 1), Point(-1, 0), Point(0, -1)]
+
+def test_adjacency():
+    assert ORIGIN.is_adjacent_to(Point(1,0))
+    assert ORIGIN.is_adjacent_to(Point(-1,0))
+    assert ORIGIN.is_adjacent_to(Point(0,1))
+    assert ORIGIN.is_adjacent_to(Point(0,-1))
+    assert not ORIGIN.is_adjacent_to(Point(1, 1))
 
 def test_text_grid_can_get_points():
     text_grid = TextGrid(["a", "b"])

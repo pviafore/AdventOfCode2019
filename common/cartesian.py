@@ -19,10 +19,17 @@ class Point:
     def to_below(self) -> 'Point':
         return Point(self.x, self.y - 1)
 
+    def is_adjacent_to(self, point: 'Point') -> bool:
+        return ((abs(self.x - point.x) == 1 and abs(self.y - point.y) == 0) or
+                (abs(self.x - point.x) == 0 and abs(self.y - point.y) == 1))
+
 ORIGIN = Point(0, 0)
 
 def get_manhattan_distance(point1: Point, point2: Point) -> int:
     return abs(point1.x - point2.x) + abs(point1.y - point2.y)
+
+def get_orthogonal_points(point: Point) -> List[Point]:
+    return [point.to_right(), point.to_above(), point.to_left(), point.to_below()]
 
 class TextGrid:
     def __init__(self, lines: List[str]):
@@ -51,14 +58,14 @@ def draw(points: Dict[Point, T],
          transform_func: Callable[[T], str] = str,
          *,
          inverted: bool = False):
-    xes = range(min(p.x for p in points), max(p.x for p in points))
+    xes = range(min(p.x for p in points), max(p.x for p in points) + 1)
 
     if inverted:
         yes = range(max(p.y for p in points), min(p.y for p in points) - 1, -1)
     else:
         yes = range(min(p.y for p in points), max(p.y for p in points) + 1)
     for y, x in product(yes, xes): # pylint: disable=invalid-name
-        if x == 0:
+        if x == min(xes):
             print()
         print(transform_func(points[Point(x, y)]), end="")
     print()

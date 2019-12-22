@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from itertools import product
-from typing import Callable, Dict, List, TypeVar
+from typing import Callable, Dict, List, Optional, TypeVar
 
 @dataclass(frozen=True, order=True)
 class Point:
@@ -45,8 +45,15 @@ class TextGrid:
     def get_all_points_matching_symbol(self, symbol: str) -> List[Point]:
         return [p for p, sym in self._grid.items() if sym == symbol]
 
+    def get_all_points_matching_function(self, matcher: Callable[[str], bool]) -> List[Point]:
+        return [p for p, sym in self._grid.items() if matcher(sym)]
+
     def set(self, point: Point, symbol: str):
         self._grid[point] = symbol
+
+    def get(self, point: Point, default: Optional[str] = None) -> Optional[str]:
+        return self._grid.get(point, default)
+
 
 def get_slope(point1: Point, point2: Point) -> float:
     if point2.x == point1.x:

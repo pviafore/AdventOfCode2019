@@ -71,3 +71,16 @@ def test_day15():
     from challenge15 import run_program
     assert run_program().get_distance_to_oxygen_station() == 404
     assert run_program().calculate_distance_for_oxygen_to_progpagate() == 406
+
+def test_day16():
+    from challenge16 import SIGNAL, get_fft_digits
+    assert get_fft_digits(SIGNAL, 100) == str(50053207)
+
+def test_day17():
+    from challenge17 import run_program
+    assert run_program() == 7720
+
+def test_day22():
+    from challenge22 import INSTRUCTIONS, get_card_index_after_big_shuffle, get_card_index
+    assert get_card_index(INSTRUCTIONS, 2019, 10007) == 6638
+    assert get_card_index_after_big_shuffle(INSTRUCTIONS) == 77863024474406

@@ -54,8 +54,9 @@ def test_day11():
     assert run_program(Color.BLACK).get_painted_squares() == 1907
 
 def test_day12():
-    from challenge12 import MOONS, run_simulation
+    from challenge12 import MOONS, run_simulation, run_simulation_until_back_to_initial
     assert run_simulation(1000, MOONS) == 6735
+    assert run_simulation_until_back_to_initial(MOONS) ==  326489627728984
 
 def test_day13():
     from challenge13 import run_program

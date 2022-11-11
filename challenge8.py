@@ -14,7 +14,7 @@ def get_product_of_1s_and_2s_in_target_layer(image_data: List[str]) -> int:
     return target_layer.count("1") * target_layer.count("2")
 
 def print_image(image_data: List[str]):
-    image_string = "".join(get_visible_pixel(pixels) for pixels in zip((*image_data)))
+    image_string = "".join(get_visible_pixel(pixels) for pixels in zip(*image_data))
     print("\n".join(chunk(image_string, 25)))
 
 def get_visible_pixel(pixels: Iterable[str]) -> str:
